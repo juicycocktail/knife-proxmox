@@ -28,6 +28,10 @@ class Chef
         :long  => "--target node",
         :description => "Node name to clone onto"
 
+      option :format,
+        :long  => "--format format",
+        :description => "Target format for file storage"
+
       option :full,
         :long => "--full",
         :boolean => true,
@@ -46,6 +50,7 @@ class Chef
         vm_config[:target] = config[:target] if config[:target]
         vm_config[:name] = config[:name]  if config[:name] 
         vm_config[:pool] = config[:pool]  if config[:pool] 
+        vm_config[:format] = config[:format]  if config[:format] 
         vm_config[:storage] = config[:storage]  if config[:storage] 
         vm_config[:full] = 1 if config[:full]
         puts vm_config
