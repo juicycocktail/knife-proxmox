@@ -101,13 +101,8 @@ class Chef
       end      
       
       def new_vmid
-        vmid ||= @connection['cluster/resources?type=vm'].get @auth_params do |response, request, result, &block|
-          data = JSON.parse(response.body)['data']
-          vmids = Set[]
-          data.each {|entry|
-            vmids.add entry['vmid']
-          }
-          (vmids.empty? ? 100 : (vmids.max + 1)).to_s
+        vmid ||= @connection['cluster/nextid'].get @auth_params do |response, request, result, &block|
+          JSON.parse(response.body)['data']
         end
       end
 
