@@ -47,9 +47,8 @@ class Chef
         vm_config[:name] = config[:name]  if config[:name] 
         vm_config[:pool] = config[:pool]  if config[:pool] 
         vm_config[:storage] = config[:storage]  if config[:storage] 
-        vm_config[:full] = config[:full]  if config[:full] 
+        vm_config[:full] = 1 if config[:full]
         puts vm_config
-
 
         vm_definition = vm_config.to_a.map { |v| v.join '=' }.join '&'
         puts vm_definition
