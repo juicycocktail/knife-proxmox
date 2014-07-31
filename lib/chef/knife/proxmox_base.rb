@@ -229,6 +229,17 @@ class Chef
           exit 1
       end      
 
+      def vm_shutdown(vmid)
+        node = vmid_to_node(vmid)
+        ui.msg("Shutting down VM #{vmid}...")
+        @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/status/shutdown"].post "", @auth_params do |response, request, result, &block|
+          action_response("server shutdown",response)
+        end
+        rescue Exception => e
+          ui.warn("The VMID does not match any node")
+          exit 1
+      end      
+
       def vm_info(vmid, field)
         @connection["nodes/#{Chef::Config[:knife][:pve_node_name]}/#{vmid_to_type(vmid)}/#{vmid}/status/current"].get @auth_params do |response, request, result, &block|
           if field == 'all'
