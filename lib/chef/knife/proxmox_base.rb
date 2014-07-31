@@ -102,7 +102,7 @@ class Chef
       
       def new_vmid
         vmid ||= @connection['cluster/nextid'].get @auth_params do |response, request, result, &block|
-          JSON.parse(response.body)['data']
+          JSON.parse(response.body)['data'].to_i
         end
       end
 
