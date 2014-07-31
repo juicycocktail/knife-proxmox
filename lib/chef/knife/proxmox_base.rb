@@ -11,8 +11,10 @@ class Chef
             require 'rubygems'
             require 'rest_client'
             require 'json'
+            require 'tempfile'
             require 'chef/json_compat'
             require 'cgi'
+            require 'uri'
             require 'chef/log'
             require 'set'
             require 'net/ssh/multi'
@@ -261,6 +263,23 @@ class Chef
           else
             JSON.parse(response.body)['data'][field]
           end
+        end
+      end
+
+      def vm_shell(vmid)
+        node = vmid_to_node(vmid)
+        proxy = URI.parse(Chef::Config[:knife][:pve_cluster_url]).host
+        @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/spiceproxy"].post "proxy=#{proxy}", @auth_params do |response, request, result, &block|
+          data = JSON.parse(response.body)['data']
+          file = Tempfile.new("spiceshell-#{vmid}")
+          file.write("[virt-viewer]\n")
+          data.each do |k, v| 
+            file.write("#{k}=#{v}\n")
+          end
+          file.close()
+          system "remote-viewer #{file.path}"
+
+          file.unlink()
         end
       end
       
