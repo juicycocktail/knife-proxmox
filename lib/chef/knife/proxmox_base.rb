@@ -73,7 +73,7 @@ class Chef
               ticket = data['data']['ticket']
               csrf_prevention_token = data['data']['CSRFPreventionToken']
               if !ticket.nil? then
-                token = 'PVEAuthCookie=' + ticket.gsub!(/:/,'%3A').gsub!(/=/,'%3D')
+                token = 'PVEAuthCookie=' + ticket.gsub!(/:/,'%3A').gsub!(/=/,'%3D')  #/
               end
             end
           end
@@ -152,7 +152,7 @@ class Chef
         end
       end
       
-      def action_response(action,response)
+      def action_response(action, node, response)
         result = nil
         taskid = nil
         begin
@@ -160,19 +160,21 @@ class Chef
             result = "Error: #{response.code.to_s} - #{response.body}"
           end
           taskid = JSON.parse(response.body)['data']
-          waitfor(taskid)
+          waitfor(node, taskid)
           Chef::Log.debug("Action: #{action}, Result: #{result}\n")
         rescue Exception => msg
           result = "An exception ocurred.  Use -VV to show it"
+          puts response
           Chef::Log.debug("Action: #{action}, Result: #{msg}\n")
         end
       end
 
-      def waitfor(taskid, timeout=60)
+      def waitfor(node, taskid, timeout=60)
+
         taskstatus = nil
         while taskstatus.nil? and timeout>= 0 do
-          @connection["nodes/#{Chef::Config[:knife][:pve_node_name]}/tasks/#{taskid}/status"].get @auth_params do |response, request, result, &block|
-            taskstatus = (JSON.parse(response.body)['data']['status'] == "stopped")?true:nil
+          @connection["nodes/#{node}/tasks/#{taskid}/status"].get @auth_params do |response, request, result, &block|
+            taskstatus = (JSON.parse(response.body)['data']['status'] == "stopped") ? true : nil
           end
           timeout-=1
           sleep(1)
@@ -196,16 +198,16 @@ class Chef
       def vm_create(vmid, type, vm_definition)
         ui.msg("Creating VM #{vmid}...")
         @connection["nodes/#{Chef::Config[:knife][:pve_node_name]}/#{type}"].post "#{vm_definition}", @auth_params do |response, request, result, &block|
-          action_response("server create",response)
+          action_response("server create", Chef::Config[:knife][:pve_node_name], response)
         end
       end
 
       def vm_clone(vmid, newid, vm_definition)
-        ui.msg("Cloninf VM #{vmid} to #{newid}...")
+        ui.msg("Cloning VM #{vmid} to #{newid}...")
         node = vmid_to_node(vmid)
         url = "nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/clone"
         @connection[url].post "#{vm_definition}", @auth_params do |response, request, result, &block|
-          action_response("server clone",response)
+          action_response("server clone", node, response)
         end
       end
 
@@ -214,7 +216,7 @@ class Chef
         ui.msg("Deleting VM #{vmid}...")
         node = vmid_to_node(vmid)
         @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}"].delete @auth_params do |response, request, result, &block|
-          action_response("qemu delete",response)
+          action_response("qemu delete", node, response)
         end
       end
 
@@ -222,7 +224,7 @@ class Chef
         node = vmid_to_node(vmid)
         ui.msg("Starting VM #{vmid} on node #{node}...")
         @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/status/start"].post "", @auth_params do |response, request, result, &block|
-          action_response("server start",response)
+          action_response("server start", node, response)
         end
         rescue Exception => e
           ui.warn("The VMID does not match any node")
@@ -233,7 +235,7 @@ class Chef
         node = vmid_to_node(vmid)
         ui.msg("Stopping VM #{vmid}...")
         @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/status/stop"].post "", @auth_params do |response, request, result, &block|
-          action_response("server stop",response)
+          action_response("server stop", node, response)
         end
         rescue Exception => e
           ui.warn("The VMID does not match any node")
@@ -244,7 +246,7 @@ class Chef
         node = vmid_to_node(vmid)
         ui.msg("Shutting down VM #{vmid}...")
         @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/status/shutdown"].post "", @auth_params do |response, request, result, &block|
-          action_response("server shutdown",response)
+          action_response("server shutdown", node, response)
         end
         rescue Exception => e
           ui.warn("The VMID does not match any node")
