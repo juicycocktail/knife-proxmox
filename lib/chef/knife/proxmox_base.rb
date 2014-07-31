@@ -200,9 +200,20 @@ class Chef
         end
       end
 
+      def vm_clone(vmid, newid, vm_definition)
+        ui.msg("Cloninf VM #{vmid} to #{newid}...")
+        node = vmid_to_node(vmid)
+        url = "nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/clone"
+        @connection[url].post "#{vm_definition}", @auth_params do |response, request, result, &block|
+          action_response("server clone",response)
+        end
+      end
+
+
       def vm_delete(vmid)
         ui.msg("Deleting VM #{vmid}...")
-        @connection["nodes/#{Chef::Config[:knife][:pve_node_name]}/#{vmid_to_type(vmid)}/#{vmid}"].delete @auth_params do |response, request, result, &block|
+        node = vmid_to_node(vmid)
+        @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}"].delete @auth_params do |response, request, result, &block|
           action_response("qemu delete",response)
         end
       end
