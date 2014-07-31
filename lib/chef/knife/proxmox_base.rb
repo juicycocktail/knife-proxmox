@@ -252,7 +252,8 @@ class Chef
       end      
 
       def vm_info(vmid, field)
-        @connection["nodes/#{Chef::Config[:knife][:pve_node_name]}/#{vmid_to_type(vmid)}/#{vmid}/status/current"].get @auth_params do |response, request, result, &block|
+        node = vmid_to_node(vmid)
+        @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/status/current"].get @auth_params do |response, request, result, &block|
           if field == 'all'
             JSON.parse(response.body)['data']
           else
