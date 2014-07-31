@@ -9,9 +9,9 @@ class Chef
 
       banner "knife proxmox vm info (options)"
 
-      option :vm_id,
+      option :vmid,
         :short => "-I ID",
-        :long  => "--vm_id ID",
+        :long  => "--vmid ID",
         :description => "The numeric identifier of the VM"
 
       option :field,
@@ -22,13 +22,13 @@ class Chef
       def run
         connection
 
-        [:vm_id].each do |param|
+        [:vmid].each do |param|
           check_config_parameter(param)
         end
 
         field = config[:field] ||= "all"
 
-        data = vm_info(config[:vm_id], field)
+        data = vm_info(config[:vmid], field)
 
         ui.output(data)
 

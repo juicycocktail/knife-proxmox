@@ -9,19 +9,19 @@ class Chef
 
       banner "knife proxmox vm stop (options)"
 
-      option :vm_id,
+      option :vmid,
         :short => "-I ID",
-        :long  => "--vm_id ID",
+        :long  => "--vmid ID",
         :description => "The numeric identifier of the VM"
       
       def run
         connection
         
-        [:vm_id].each do |param|
+        [:vmid].each do |param|
           check_config_parameter(param)
         end
 
-        vm_stop(config[:vm_id])
+        vm_stop(config[:vmid])
         
       end
     end

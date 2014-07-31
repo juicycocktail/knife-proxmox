@@ -21,9 +21,9 @@ class Chef
         :long => "--hostname hostname",
         :description => "The name of the node and client to delete, if it differs from the server name.  Only has meaning when used with the '--purge' option."
         
-      option :vm_id,
+      option :vmid,
         :short => "-I ID",
-        :long  => "--vm_id ID",
+        :long  => "--vmid ID",
         :description => "The numeric identifier of the VM"
 
       option :force,
@@ -35,25 +35,25 @@ class Chef
         connection
         
         #TODO: must detect which parameter has been used: name or vmid
-        vm_id = nil
-        if (config[:vm_id].nil? and config[:chef_node_name].nil?) then
+        vmid = nil
+        if (config[:vmid].nil? and config[:chef_node_name].nil?) then
           ui.error("You must use -I <id> or -H <Hostname>")
           exit 1
         elsif (!config[:chef_node_name].nil?)
             name = config[:chef_node_name]
-            vm_id = server_name_to_vmid(name)
-            puts "Server to destroy: #{name} [vmid: #{vm_id}]"
+            vmid = server_name_to_vmid(name)
+            puts "Server to destroy: #{name} [vmid: #{vmid}]"
             if (config[:force].nil?) then
               ui.confirm("Continue")
             end
         else
-          vm_id = config[:vm_id]
+          vmid = config[:vmid]
         end
         
         begin
-          vm_stop(vm_id)
+          vm_stop(vmid)
           sleep(3)
-          vm_delete(vm_id)
+          vm_delete(vmid)
         rescue Exception => e
           ui.warn("Error trying to destroy the server. Does the server exist?")
           exit 1
@@ -61,11 +61,11 @@ class Chef
         
         #TODO: remove server from chef
         # if config[:purge]
-        #   thing_to_delete = config[:chef_node_name] || server_get_data(config[:vm_id],"name")
+        #   thing_to_delete = config[:chef_node_name] || server_get_data(config[:vmid],"name")
         #   destroy_item(Chef::Node, thing_to_delete, "node")
         #   destroy_item(Chef::ApiClient, thing_to_delete, "client")
         # else
-        #   ui.warn("Corresponding node and client for the #{vm_id} server were not deleted and remain registered with the Chef Server")
+        #   ui.warn("Corresponding node and client for the #{vmid} server were not deleted and remain registered with the Chef Server")
         # end
       end
       

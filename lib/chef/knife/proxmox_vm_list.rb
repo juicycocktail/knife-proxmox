@@ -30,9 +30,9 @@ class Chef
 
         @connection['cluster/resources?type=vm'].get @auth_params do |response, request, result, &block|
           JSON.parse(response.body)['data'].sort_by{ |entry| entry[field] }.each {|entry|
-            vm_id = entry['vmid']
+            vmid = entry['vmid']
             type  = entry['type']
-            server_list << vm_id.to_s
+            server_list << vmid.to_s
             server_list << entry['node']
             server_list << entry['name']
             server_list << type
