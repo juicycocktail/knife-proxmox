@@ -266,6 +266,18 @@ class Chef
         end
       end
 
+      def vm_config_get(vmid, field)
+        node = vmid_to_node(vmid)
+        @connection["nodes/#{node}/#{vmid_to_type(vmid)}/#{vmid}/config"].get @auth_params do |response, request, result, &block|
+          data = JSON.parse(response.body)['data']
+          if field == 'all'
+            data
+          else 
+            data[field]
+          end
+        end
+      end
+
       def vm_shell(vmid)
         node = vmid_to_node(vmid)
         proxy = URI.parse(Chef::Config[:knife][:pve_cluster_url]).host
